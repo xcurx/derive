@@ -1,0 +1,173 @@
+import React, { useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Button } from '../ui/button'
+import { Key } from 'lucide-react'
+import { Token } from '@/types/types'
+import { Card } from '../ui/card'
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { useQuery } from '@apollo/client'
+import { GET_OWNED_NFT_KEYS } from '@/graphql/queries'
+import { zeroAddress } from 'viem'
+import { toast } from 'sonner'
+import { abi } from '../../abi.json'    
+
+const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
+    const [open, setOpen] = useState(false)
+    const { address } = useAccount()
+    const [tokenId, setTokenId] = useState<number | undefined>(undefined);
+    const contractaddress = process.env.CONTRACT_ADDRESS as `0x${string}`;
+
+    const { loading, error:errorInquery, data } = useQuery(GET_OWNED_NFT_KEYS, {
+      variables: {
+        currentOwner: address || zeroAddress // Use zeroAddress if address is not available
+      }
+    });
+
+    console.log("CA", contractaddress)
+
+    const { 
+      writeContract,
+      data: hash,
+      error,
+      // isPending
+    } = useWriteContract()
+
+    const {
+      isLoading: isCreating,
+      isSuccess: isConfirmed
+    } = useWaitForTransactionReceipt({
+      hash
+    })
+
+    const handleAddKey = async () => {
+        if (!tokenId) {
+          toast.error("Please select a token ID");
+          return;
+        }
+
+        console.log(resourceId)
+
+        writeContract({
+          address: contractaddress,
+          abi,
+          functionName: "addAccess",
+          args: [resourceId, tokenId],
+        })
+
+        if (error) {
+          toast.error(`Error adding key: ${error.message}`);
+          return;
+        }
+
+        if (isCreating) {
+          toast.loading("Adding key...");
+        }
+
+        if (isConfirmed) {
+          toast.success("Key added successfully!");
+        //   setOpen(false);
+        //   setTokenId(undefined); // Reset tokenId after adding
+        }
+    }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          size="sm" 
+          variant="outline"
+        >
+          <Key className="mr-1 h-3 w-3" />
+          Keys
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Manage Access Keys</DialogTitle>
+          <DialogDescription>
+            Manage NFT keys that have access to this file. You can remove access, reclaim keys, or burn them permanently.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div>
+            <h2 className='my-1'>Add key</h2>
+            <div className="flex justify-between items-center">
+              {/* <Label htmlFor="type">Select a key to add</Label> */}
+              {
+                data && 
+                <Select value={tokenId?.toString()} onValueChange={(e) => setTokenId(Number(e))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {
+                        data?.tokens?.map((nft:Token) => {
+                            return <SelectItem key={nft.tokenId} value={nft.tokenId.toString()}>
+                                {`Token #${nft.tokenId}`}
+                            </SelectItem> 
+                    })
+                    }
+                  </SelectContent>
+                </Select>
+              }
+              <Button size={"sm"} onClick={handleAddKey}>Add</Button>
+            </div>
+            <div>
+              {
+                loading && <div className="text-gray-500">Loading NFT keys...</div>
+              }
+              {
+                errorInquery && <div className="text-red-500">Error loading NFT keys: {errorInquery.message}</div>
+              }
+            </div>
+          </div>
+          {   
+            tokens?.length > 0 ? tokens.map(token => (
+              <Card key={token.tokenId} className='py-2 px-3'>
+                <div className=''>
+                  <div className="">
+                    <div>Token #{token.tokenId}</div>
+                    <div className='text-xs'>Current Owner: {token.currentOwner}</div>
+                  </div>
+                  <div className='flex my-2 space-x-4 justify-end'>
+                    {
+                        token.currentOwner !== token.realOwner ?
+                        <Button size={"sm"}>
+                          Reclaim
+                        </Button> : null
+                    }
+                    <Button size={"sm"}>
+                      Remove
+                    </Button>
+                  </div>
+                  </div>
+              </Card>
+            ))  : null
+          }   
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export default Keys

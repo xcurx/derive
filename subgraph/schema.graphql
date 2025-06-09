@@ -1,0 +1,89 @@
+type AccessAdded @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes! # bytes32
+  tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Creation @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  tokenId: BigInt! # uint256
+  name: String! # string
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type KeyReclaimed @entity(immutable: true) {
+  id: Bytes!
+  prevOwner: Bytes! # address
+  tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RemovedFromList @entity(immutable: true) {
+  id: Bytes!
+  resourceId: Bytes! # bytes32
+  tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ResourceAdded @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  resourceId: Bytes! # bytes32
+  name: String! # string
+  tokenId: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ResourceRemoved @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  resourceId: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Transfer @entity(immutable: true) {
+  id: Bytes!
+  from: Bytes! # address
+  to: Bytes! # address
+  internal_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Token @entity(immutable: false) {
+  id: Bytes!
+  name: String!
+  realOwner: Bytes!
+  currentOwner: Bytes!
+  tokenId: BigInt!
+  resources: [Resource!]! @derivedFrom(field: "tokens")
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Resource @entity(immutable: false) {
+  id: Bytes!
+  owner: Bytes!
+  name: String!
+  resourceId: Bytes!
+  tokens: [Token!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.24.1"
+  },
+  "dependencies": {
+    "@lit-protocol/lit-node-client": "^7.1.3"
+  }
+}
