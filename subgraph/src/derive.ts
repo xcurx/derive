@@ -1,4 +1,3 @@
-import { Bytes, store } from "@graphprotocol/graph-ts"
 import {
   AccessAdded as AccessAddedEvent,
   Creation as CreationEvent,
@@ -13,10 +12,8 @@ import {
   Creation,
   KeyReclaimed,
   RemovedFromList,
-  Resource,
   ResourceAdded,
   ResourceRemoved,
-  Token,
   Transfer
 } from "../generated/schema"
 
@@ -32,20 +29,6 @@ export function handleAccessAdded(event: AccessAddedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.resourceId.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-
-  let resource = Resource.load(idBytes)
-  if (resource) {
-    let tokenEntityId = Bytes.fromUTF8(
-      event.address.toHex() + "-" + event.params.tokenId.toString()
-    );
-    let tokens = resource.tokens
-    tokens.push(tokenEntityId)
-    resource.tokens = tokens
-    resource.save()
-  }
 }
 
 export function handleCreation(event: CreationEvent): void {
@@ -61,21 +44,6 @@ export function handleCreation(event: CreationEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.tokenId.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-
-  const token = new Token(idBytes)
-  
-  token.name = event.params.name
-  token.realOwner = event.params.owner
-  token.currentOwner = event.params.owner
-  token.tokenId = event.params.tokenId
-
-  token.blockNumber = event.block.number
-  token.blockTimestamp = event.block.timestamp
-  token.transactionHash = event.transaction.hash
-  token.save();
 }
 
 export function handleKeyReclaimed(event: KeyReclaimedEvent): void {
@@ -104,26 +72,6 @@ export function handleRemovedFromList(event: RemovedFromListEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.resourceId.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-
-  let resource = Resource.load(idBytes)
-  if (resource) {
-    let tokenEntityId = Bytes.fromUTF8(
-      event.address.toHex() + "-" + event.params.tokenId.toString()
-    );
-    let updatedTokens: Bytes[] = [];
-
-    for (let i = 0; i < resource.tokens.length; i++) {
-      if (!resource.tokens[i].equals(tokenEntityId)) {
-        updatedTokens.push(resource.tokens[i]);
-      }
-    }
-
-    resource.tokens = updatedTokens;
-    resource.save()
-  }
 }
 
 export function handleResourceAdded(event: ResourceAddedEvent): void {
@@ -132,34 +80,14 @@ export function handleResourceAdded(event: ResourceAddedEvent): void {
   )
   entity.owner = event.params.owner
   entity.resourceId = event.params.resourceId
-  entity.name = event.params.name.toString()
+  entity.name = event.params.name
   entity.tokenId = event.params.tokenId
+
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.resourceId.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-  
-  let resource = new Resource(idBytes)
-  resource.owner = event.params.owner  
-  resource.name = event.params.name.toString()
-  resource.resourceId = event.params.resourceId
-  
-  let tokenEntityId = Bytes.fromUTF8(
-    event.address.toHex() + "-" + event.params.tokenId.toString()
-  );
-  resource.tokens = [];
-  let tokens = resource.tokens
-  tokens.push(tokenEntityId)
-  resource.tokens = tokens  // reassign (important for Graph)
-
-  resource.blockNumber = event.block.number
-  resource.blockTimestamp = event.block.timestamp
-  resource.transactionHash = event.transaction.hash
-  resource.save()
 }
 
 export function handleResourceRemoved(event: ResourceRemovedEvent): void {
@@ -174,16 +102,6 @@ export function handleResourceRemoved(event: ResourceRemovedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.resourceId.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-
-  let resource = Resource.load(idBytes)
-  if (resource != null) {
-    resource.tokens = []
-    resource.save()
-    store.remove("Resource", idBytes.toHexString())
-  }    
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -199,21 +117,4 @@ export function handleTransfer(event: TransferEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
-
-  let idStr = event.address.toHex() + "-" + event.params.id.toString()
-  let idBytes = Bytes.fromUTF8(idStr)
-  let token = Token.load(idBytes)
-
-  if (!token) {
-    return
-  }
-
-  let ZERO_ADDRESS = Bytes.fromHexString("0x0000000000000000000000000000000000000000");
-  if (event.params.to.equals(ZERO_ADDRESS)) {
-    store.remove("Token", idBytes.toHexString());
-    return;
-  }
-
-  token.currentOwner = event.params.to
-  token.save()
 }

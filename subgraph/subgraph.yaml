@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: Derive
-    network: holesky
+    network: sepolia
     source:
-      address: "0x686BaD546e82eB333B3c8D515f15814f126d99E6"
+      address: "0xEb5cEa04a4e0f6A31e2D8cE4002230Bf5267FD01"
       abi: Derive
-      startBlock: 3975271
+      startBlock: 8519459
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
