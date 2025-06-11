@@ -41,6 +41,7 @@ type ResourceAdded @entity(immutable: true) {
   resourceId: Bytes! # bytes32
   name: String! # string
   tokenId: BigInt! # uint256
+  dataToEncryptHash: String! # string
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

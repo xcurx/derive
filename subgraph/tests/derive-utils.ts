@@ -108,7 +108,8 @@ export function createResourceAddedEvent(
   owner: Address,
   resourceId: Bytes,
   name: string,
-  tokenId: BigInt
+  tokenId: BigInt,
+  dataToEncryptHash: string
 ): ResourceAdded {
   let resourceAddedEvent = changetype<ResourceAdded>(newMockEvent())
 
@@ -130,6 +131,12 @@ export function createResourceAddedEvent(
     new ethereum.EventParam(
       "tokenId",
       ethereum.Value.fromUnsignedBigInt(tokenId)
+    )
+  )
+  resourceAddedEvent.parameters.push(
+    new ethereum.EventParam(
+      "dataToEncryptHash",
+      ethereum.Value.fromString(dataToEncryptHash)
     )
   )
 

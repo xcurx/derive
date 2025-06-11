@@ -28,6 +28,7 @@ import { zeroAddress } from 'viem'
 import { GET_MY_NFT_KEYS } from "@/graphql/queries"
 import { useQuery } from "@apollo/client"
 import { Token } from "@/types/types"
+import { Lit } from "@/lit"
 
 export default function AddResource() {
   const [name, setName] = useState("")
@@ -101,17 +102,24 @@ export default function AddResource() {
     // });
     // const signedUrl = await uploadRequest.json();
     // console.log("Signed URL:", signedUrl, uploadRequest);
+    const lit = new Lit("sepolia");
+    await lit.connect();
 
-    writeContract({
-      address: contractaddress,
-      abi,
-      functionName: "addResource",
-      args: [name, "ccc", tokenId],
-    })
+    const res = await lit.encryptFile(file, "");
+    console.log("Encrypted file:", res);
 
-    if(isPending) {
-      toast.loading("Uploading resource...")
-    }
+    // const res = await lit.decryptFile(
+    //   "twcEa1f9A9B4t6CzAkjVrORvX3BQ1WMOzHklSbOJxkArBJ91U+…4eo4RX3MpNgFcbzLyQ5bqd1MQosFCLA6NiCfsHPulp2C4Ag==",
+    //   "5ab8ccbc08ff6dc324803b95aa421fbb94967539a09bafb675f9a545a7ea7962"
+    // )
+    // console.log("Decrypted file:", res);
+
+    // writeContract({
+    //   address: contractaddress,
+    //   abi,
+    //   functionName: "addResource",
+    //   args: [name, "c1", tokenId],
+    // })
   }
 
   return (
@@ -206,7 +214,7 @@ export default function AddResource() {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} disabled={isCreating || !file}>
+          <Button onClick={handleUpload} disabled={isCreating}>
             {isCreating ? "Uploading..." : "Upload Resource"}
           </Button>
         </DialogFooter>

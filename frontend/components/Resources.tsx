@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Download, FileText } from 'lucide-react'
 import { Button } from './ui/button'
 import AddResource from './Dialogs/AddResource'
@@ -50,9 +50,11 @@ const Resources = () => {
                       <FileText className="h-4 w-4" />
                       <CardTitle className="text-lg truncate w-[200]">{resource.name}</CardTitle>
                     </div>
-                    {/* <CardDescription>
-                      {resource.size} • Uploaded {resource.uploadedAt}
-                    </CardDescription> */}
+                    <CardDescription>
+                      {
+                        resource.resourceId
+                      }
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* <div className="flex items-center justify-between">

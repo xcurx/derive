@@ -8,9 +8,9 @@ dataSources:
     name: Derive
     network: sepolia
     source:
-      address: "0xEb5cEa04a4e0f6A31e2D8cE4002230Bf5267FD01"
+      address: "0x5DeA7d51155133F6f0bAF11614433c124C09F2B1"
       abi: Derive
-      startBlock: 8519459
+      startBlock: 8526644
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -35,7 +35,7 @@ dataSources:
           handler: handleKeyReclaimed
         - event: RemovedFromList(bytes32,uint256)
           handler: handleRemovedFromList
-        - event: ResourceAdded(address,bytes32,string,uint256)
+        - event: ResourceAdded(address,bytes32,string,uint256,string)
           handler: handleResourceAdded
         - event: ResourceRemoved(address,bytes32)
           handler: handleResourceRemoved
