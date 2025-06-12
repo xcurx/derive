@@ -82,7 +82,6 @@ export function handleResourceAdded(event: ResourceAddedEvent): void {
   entity.resourceId = event.params.resourceId
   entity.name = event.params.name
   entity.tokenId = event.params.tokenId
-  entity.dataToEncryptHash = event.params.dataToEncryptHash
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

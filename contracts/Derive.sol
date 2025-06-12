@@ -5,7 +5,7 @@ import "./ERC721.sol";
 
 contract Derive is ERC721 {
     event Creation(address owner, uint tokenId, string name);
-    event ResourceAdded(address owner, bytes32 resourceId, string name, uint tokenId, string dataToEncryptHash);
+    event ResourceAdded(address owner, bytes32 resourceId, string name, uint tokenId);
     event AccessAdded(bytes32 resourceId, uint tokenId);
     event KeyReclaimed(address prevOwner, uint tokenId);
     event RemovedFromList(bytes32 resourceId, uint tokenId);
@@ -24,7 +24,6 @@ contract Derive is ERC721 {
         string name;
         string cid;
         address owner;
-        string dataToEncryptHash;
     }
 
     mapping(uint => Key) keys;
@@ -65,8 +64,7 @@ contract Derive is ERC721 {
     function addResource(
         string memory _name, 
         string memory _cid, 
-        uint tokenId, 
-        string memory _dataToEncryptHash
+        uint tokenId
     ) external isOwner(tokenId) {
         bytes32 resourceId = keccak256(abi.encode(_name, msg.sender));
         require(resources[resourceId].owner == address(0), "Resource already exists");
@@ -74,12 +72,11 @@ contract Derive is ERC721 {
         resources[resourceId] = Resource({ 
             name: _name, 
             cid: _cid, 
-            owner:msg.sender,
-            dataToEncryptHash: _dataToEncryptHash
+            owner:msg.sender
         });
         access[resourceId].push(tokenId);
 
-        emit ResourceAdded(msg.sender, resourceId, _name, tokenId, _dataToEncryptHash);
+        emit ResourceAdded(msg.sender, resourceId, _name, tokenId);
     }
 
     function removeResource(bytes32 resourceId) external isResourceOwner(resourceId) {
@@ -105,8 +102,8 @@ contract Derive is ERC721 {
         return false;
     }
 
-    function getResource(bytes32 resourceId) external view returns (Resource memory) {
-        if(hasAccess(msg.sender ,resourceId)) {
+    function getResource(address caller, bytes32 resourceId) external view returns (Resource memory) {
+        if(hasAccess(caller, resourceId)) {
             return resources[resourceId];
         } else {
             revert("You do not have access");

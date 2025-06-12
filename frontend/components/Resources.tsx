@@ -1,7 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, FileText } from 'lucide-react'
-import { Button } from './ui/button'
+import { FileText } from 'lucide-react'
 import AddResource from './Dialogs/AddResource'
 import { useAccount } from 'wagmi'
 import { GET_RESOURCES } from '@/graphql/queries'
@@ -9,11 +8,12 @@ import { useQuery } from '@apollo/client'
 import { Resource } from '@/types/types'
 import Manage from './Dialogs/Manage'
 import Keys from './Dialogs/Keys'
+import OpenResource from './Dialogs/OpenResource'
 
 const Resources = () => {
     const { address } = useAccount()
 
-    const { loading, error, data } = useQuery(GET_RESOURCES, {
+    const { loading, error, data, refetch } = useQuery(GET_RESOURCES, {
       variables: {
          owner: address
       }
@@ -33,7 +33,7 @@ const Resources = () => {
     <>
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resources</h2>
-            <AddResource/>
+            <AddResource refetch={refetch}/>
         </div>
 
         <Card>
@@ -68,10 +68,7 @@ const Resources = () => {
                     <div className="flex space-x-2">
                       <Keys tokens={resource.tokens || []} resourceId={resource.resourceId}/>
                       <Manage tokens={resource.tokens || []}/>
-                      <Button size="sm" variant="outline">
-                        <Download className="mr-1 h-3 w-3" />
-                        Download
-                      </Button>
+                      <OpenResource resourceId={resource.resourceId}/>
                     </div>
                   </CardContent>
                 </Card>

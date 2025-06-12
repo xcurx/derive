@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -24,13 +24,13 @@ import { Upload } from 'lucide-react'
 import { toast } from "sonner"
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi"
 import { abi } from "../../abi.json"
-import { zeroAddress } from 'viem'
+import { encodeAbiParameters, keccak256, parseAbiParameters, zeroAddress } from 'viem'
 import { GET_MY_NFT_KEYS } from "@/graphql/queries"
 import { useQuery } from "@apollo/client"
-import { Token } from "@/types/types"
+import { RefetchType, Token } from "@/types/types"
 import { Lit } from "@/lit"
 
-export default function AddResource() {
+export default function AddResource({ refetch }:RefetchType) {
   const [name, setName] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [tokenId, setTokenId] = useState<number | null>(null);
@@ -40,7 +40,7 @@ export default function AddResource() {
 
   const { loading, error:errorInquery, data } = useQuery(GET_MY_NFT_KEYS, {
     variables: {
-      realOwner: address || zeroAddress // Use zeroAddress if address is not available
+      realOwner: address || zeroAddress
     }
   });
 
@@ -96,31 +96,65 @@ export default function AddResource() {
 
     const data = new FormData();
     data.set("file", file);
-    // const uploadRequest = await fetch("/api/files", {
-    //   method: "POST",
-    //   body: data,
-    // });
-    // const signedUrl = await uploadRequest.json();
-    // console.log("Signed URL:", signedUrl, uploadRequest);
+    const uploadRequest = await fetch("/api/files", {
+      method: "POST",
+      body: data,
+    });
+    const signedUrl = await uploadRequest.json();
+    console.log("Signed URL:", signedUrl, uploadRequest);
+
     const lit = new Lit("sepolia");
     await lit.connect();
 
-    const res = await lit.encryptFile(file, "");
+    const parameterTypes = parseAbiParameters('string, address');
+
+    const encodedData = encodeAbiParameters(
+      parameterTypes,
+      [name, address as `0x${string}`]
+    );
+
+    const preCalculatedResourceId = keccak256(encodedData);
+    console.log("Pre-calculated Resource ID:", preCalculatedResourceId);
+
+    const res = await lit.encryptFile(file, preCalculatedResourceId);
     console.log("Encrypted file:", res);
 
     // const res = await lit.decryptFile(
-    //   "twcEa1f9A9B4t6CzAkjVrORvX3BQ1WMOzHklSbOJxkArBJ91U+…4eo4RX3MpNgFcbzLyQ5bqd1MQosFCLA6NiCfsHPulp2C4Ag==",
-    //   "5ab8ccbc08ff6dc324803b95aa421fbb94967539a09bafb675f9a545a7ea7962"
     // )
     // console.log("Decrypted file:", res);
 
-    // writeContract({
-    //   address: contractaddress,
-    //   abi,
-    //   functionName: "addResource",
-    //   args: [name, "c1", tokenId],
-    // })
+    // const blob = new Blob([res.slice()], { type: 'application/octet-stream' });
+
+    // // 2. Create a temporary URL for the Blob
+    // const url = URL.createObjectURL(blob);
+
+    // // 3. Create a temporary anchor element (`<a>`)
+    // const a = document.createElement('a');
+    // a.href = url;
+    // a.download = name; // Set the file name for the download
+    // document.body.appendChild(a); // Append to the document
+
+    // // 4. Programmatically click the anchor to trigger the download
+    // a.click();
+
+    // // 5. Clean up by removing the anchor and revoking the URL
+    // document.body.removeChild(a);
+    // URL.revokeObjectURL(url);
+
+    writeContract({
+      address: contractaddress,
+      abi,
+      functionName: "addResource",
+      args: [name, signedUrl, tokenId, "nodata"],
+    })
   }
+
+  useEffect(() => {
+    if(isConfirmed){
+      setName("");
+      refetch();
+    }
+  }, [isConfirmed, error, refetch])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -193,6 +227,9 @@ export default function AddResource() {
             }
             {
               errorInquery && <div className="text-red-500">Error loading NFT keys: {errorInquery.message}</div>
+            }
+            {
+              isPending && <div className='text-blue-600'>Transaction is pending...</div>
             }
           </div>
           <div className="text-sm text-gray-600">

@@ -107,12 +107,6 @@
           "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "dataToEncryptHash",
-          "type": "string"
         }
       ],
       "name": "ResourceAdded",
@@ -196,11 +190,6 @@
           "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "_dataToEncryptHash",
-          "type": "string"
         }
       ],
       "name": "addResource",
@@ -293,6 +282,11 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
           "internalType": "bytes32",
           "name": "resourceId",
           "type": "bytes32"
@@ -316,11 +310,6 @@
               "internalType": "address",
               "name": "owner",
               "type": "address"
-            },
-            {
-              "internalType": "string",
-              "name": "dataToEncryptHash",
-              "type": "string"
             }
           ],
           "internalType": "struct Derive.Resource",

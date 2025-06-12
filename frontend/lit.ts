@@ -1,42 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as LitJsSdk from "@lit-protocol/lit-node-client-nodejs";
 import { LIT_ABILITY, LIT_NETWORK, LIT_RPC } from "@lit-protocol/constants";
-import { encryptFile, decryptToFile } from '@lit-protocol/encryption';
+import { decryptFromJson, encryptToJson } from '@lit-protocol/encryption';
 import { createSiweMessageWithRecaps, generateAuthSig, LitAccessControlConditionResource } from "@lit-protocol/auth-helpers";
 import { providers, Wallet } from 'ethers'
 
-const accessControlConditions = [
+const evmContractConditions = [
   {
     contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-    standardContractType: "",
     chain: "sepolia",
-    method: "hasAccess",
-    parameters: [":userAddress", ":resourceId"],
+    functionName: "hasAccess",
+    functionParams: [
+      ":userAddress",
+      ":litParam.resourceId" // Use the secure litParam placeholder
+    ],
     functionAbi: {
       "inputs": [
-        {
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "internalType": "bytes32",
-          "name": "resourceId",
-          "type": "bytes32"
-        }
+        {"internalType": "address", "name": "user", "type": "address"},
+        {"internalType": "bytes32", "name": "resourceId", "type": "bytes32"}
       ],
       "name": "hasAccess",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
+      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
       "stateMutability": "view",
       "type": "function"
     },
     returnValueTest: {
+      key:"",
       comparator: "=",
       value: "true", 
     },
@@ -136,37 +125,40 @@ export class Lit {
       if(!file){
           return;
       }
-      const updatedAccessControlConditions = {
-        ...accessControlConditions,
-        parameters: [":userAddress", resourceId],
-      }
+      const updatedEvmContractConditions = [
+        {
+          ...evmContractConditions[0],
+          functionParams: [":userAddress", resourceId],
+        }
+      ]
 
-      return await encryptFile({
+      return await encryptToJson({
           file,
-          accessControlConditions: updatedAccessControlConditions,
+          evmContractConditions: updatedEvmContractConditions,
           chain:"sepolia",
-          
-      }, this.litNodeClient);
+          litNodeClient: this.litNodeClient,
+      });
   }
 
-  async decryptFile(ciphertext: string, dataToEncryptHash: string, resourceId: string) {
-    // await this.connect();
+  async decryptFile(json:Props) {
     const sessionSigs = await this.#getSessionSignatures();
-    const updatedAccessControlConditions = {
-      ...accessControlConditions,
-      parameters: [":userAddress", resourceId],
-    }
-
-    const decryptedFile = await decryptToFile({
-        accessControlConditions: updatedAccessControlConditions,
-        chain: this.chain,
-        ciphertext,
-        dataToEncryptHash,
+    const decryptedFile = await decryptFromJson({
+        parsedJsonData: json,
+        litNodeClient: this.litNodeClient,
         sessionSigs,
       },
-      this.litNodeClient,
     );
 
     return decryptedFile;
   }
+}
+
+interface Props {
+  chain: string;
+  string?: string;
+  file?: File;
+  litNodeClient: LitJsSdk.LitNodeClientNodeJs;
+  ciphertext: string;
+  dataToEncryptHash: string;
+  dataType: "string" | "file";
 }
