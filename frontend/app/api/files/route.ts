@@ -1,13 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { pinata } from "@/config"
+import { pinata } from "@/pinata.config"
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.formData();
-    const file: File | null = data.get("file") as unknown as File;
-    const { cid } = await pinata.upload.public.file(file)
-    const url = await pinata.gateways.public.convert(cid);
-    return NextResponse.json(url, { status: 200 });
+    const body = await request.json();
+    const { content, fileName } = body;
+
+    // Basic validation
+    if (!content) {
+      return NextResponse.json(
+        { error: "Content field is required" },
+        { status: 400 }
+      );
+    }
+
+    const { cid } = await pinata.upload.public.json(
+      {
+        encryptedFile: content,
+        name: fileName || "Untitled",
+      },
+      {
+        metadata: {
+          name: fileName || "Untitled",
+        }
+      }
+    );
+
+    return NextResponse.json(cid, { status: 200 });
   } catch (e) {
     console.log(e);
     return NextResponse.json(

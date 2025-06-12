@@ -11,12 +11,24 @@ import {
 import { Button } from '../ui/button'
 import { Download } from 'lucide-react'
 import { useAccount, useReadContract } from 'wagmi'
+import { PinataSDK } from "pinata";
+import { abi } from "../../abi.json"
+import { Lit } from '@/lit'
+import { PinataReturnType, Resource } from '@/types/types'
+import { toast } from 'sonner'
 
 const OpenResource = ({ resourceId }:{ resourceId:string }) => {
     const [open, setOpen] = useState(false)
-    const { address } = useAccount()
     console.log("OpenResource resourceId:", resourceId)
+    const { address } = useAccount()
+    const [loadingData, setLoadingData] = useState(false)
+    const [decrypting, setDecrypting] = useState(false)
 
+    const pinata = new PinataSDK({
+      pinataJwt: process.env.PINATA_JWT!,
+      pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.pinata.cloud",
+    });
+    
     const { 
       data: resource,
       isError,
@@ -24,19 +36,60 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
       error
     } = useReadContract({
       address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      abi: [
-        {
-         "inputs": [{"internalType": "bytes32","name": "resourceId","type": "bytes32"}],
-         "name": "getResource",
-         "outputs": [{"components": [{  "internalType": "string",  "name": "name",  "type": "string"},{  "internalType": "string",  "name": "cid",  "type": "string"},{  "internalType": "address",  "name": "owner",  "type": "address"},{  "internalType": "string",  "name": "dataToEncryptHash",  "type": "string"}  ],  "internalType": "struct Derive.Resource",  "name": "",  "type": "tuple"}
-         ],
-         "stateMutability": "view",
-         "type": "function"
-       },
-      ],
+      abi,
       functionName: "getResource",
-      args: [resourceId as `0x${string}`],
+      args: [address as `0x${string}`, resourceId as `0x${string}`],
     })
+
+    const handleGetResource = async () => {
+      if(isLoading) {
+        toast.loading("Loading resource...");
+        return;
+      }
+      if(!resource) {
+        toast.error("No resource found");
+        return;
+      }
+
+      let fileData: JSON
+      setLoadingData(true);
+      try {
+        const { data } = await pinata.gateways.public.get(
+          (resource as Resource).cid as string,
+        )
+        fileData = data as JSON;
+      } catch {
+        toast.error("Failed to fetch resource");
+        return;
+      } finally {
+        setLoadingData(false);
+      }
+
+      setDecrypting(true);
+      try {
+        const lit = new Lit("sepolia");
+        await lit.connect();
+        const res = await lit.decryptFile(JSON.parse((fileData as PinataReturnType).encryptedFile))
+        console.log("Decrypted file:", res);
+  
+        const blob = new Blob([res.slice()], { type: 'application/octet-stream' });
+  
+        const url = URL.createObjectURL(blob);
+  
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (fileData as PinataReturnType).name as string || "downloaded_file"; 
+        document.body.appendChild(a); 
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success("Resource downloaded and decrypted successfully");
+      } catch {
+        toast.error("Failed to decrypt resource");
+      } finally {
+        setDecrypting(false);
+      }
+    }
 
      return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -60,20 +113,28 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
             ) : isError ? (
               <div>{error.message}</div>
             ) : resource ? (
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold">{resource.name}</h3>
-                <p className="text-sm text-gray-500">CID: {resource.cid}</p>
-                <p className="text-sm text-gray-500">Owner: {resource.owner}</p>
-                <p className="text-sm text-gray-500">Data Hash: {resource.dataToEncryptHash}</p>
+              <div className="space-y-2 text-blue-600">
+                You have access to this resource
               </div>
             ) : (
               <div>No resource found</div>
             )
           }
+          {
+            loadingData ? (
+              <div>Loading resource data...</div>
+            ) : decrypting ? (
+              <div>Decrypting resource...</div>
+            ) : (
+              <div className="text-sm text-gray-500">
+                Click &quot;`Open&quot;` to download and decrypt the resource.
+              </div>
+            )
+          }
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Close
+        <DialogFooter className=''>
+          <Button variant="outline" onClick={handleGetResource}>
+            Open
           </Button>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Close

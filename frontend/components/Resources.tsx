@@ -39,7 +39,6 @@ const Resources = () => {
         <Card>
           <CardHeader>
             <CardTitle>Resources created by you</CardTitle>
-            {/* <CardDescription>NFT keys that you own and have not shared to others</CardDescription> */}
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -50,10 +49,10 @@ const Resources = () => {
                       <FileText className="h-4 w-4" />
                       <CardTitle className="text-lg truncate w-[200]">{resource.name}</CardTitle>
                     </div>
-                    <CardDescription>
-                      {
-                        resource.resourceId
-                      }
+                    <CardDescription className='w-full text-sm text-gray-500 break-all'>
+                    {
+                      resource.resourceId
+                    }
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">

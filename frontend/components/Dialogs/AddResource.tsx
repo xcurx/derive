@@ -37,6 +37,8 @@ export default function AddResource({ refetch }:RefetchType) {
   const [open, setOpen] = useState(false)
   const contractaddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
   const { address } = useAccount()
+  const [uploading, setUploading] = useState(false)
+  const [encrypting, setEncrypting] = useState(false)
 
   const { loading, error:errorInquery, data } = useQuery(GET_MY_NFT_KEYS, {
     variables: {
@@ -94,58 +96,46 @@ export default function AddResource({ refetch }:RefetchType) {
       return
     }
 
-    const data = new FormData();
-    data.set("file", file);
-    const uploadRequest = await fetch("/api/files", {
-      method: "POST",
-      body: data,
-    });
-    const signedUrl = await uploadRequest.json();
-    console.log("Signed URL:", signedUrl, uploadRequest);
-
+    setEncrypting(true);
     const lit = new Lit("sepolia");
     await lit.connect();
-
     const parameterTypes = parseAbiParameters('string, address');
-
     const encodedData = encodeAbiParameters(
       parameterTypes,
       [name, address as `0x${string}`]
     );
-
     const preCalculatedResourceId = keccak256(encodedData);
-    console.log("Pre-calculated Resource ID:", preCalculatedResourceId);
-
     const res = await lit.encryptFile(file, preCalculatedResourceId);
-    console.log("Encrypted file:", res);
+    setEncrypting(false);
 
-    // const res = await lit.decryptFile(
-    // )
-    // console.log("Decrypted file:", res);
-
-    // const blob = new Blob([res.slice()], { type: 'application/octet-stream' });
-
-    // // 2. Create a temporary URL for the Blob
-    // const url = URL.createObjectURL(blob);
-
-    // // 3. Create a temporary anchor element (`<a>`)
-    // const a = document.createElement('a');
-    // a.href = url;
-    // a.download = name; // Set the file name for the download
-    // document.body.appendChild(a); // Append to the document
-
-    // // 4. Programmatically click the anchor to trigger the download
-    // a.click();
-
-    // // 5. Clean up by removing the anchor and revoking the URL
-    // document.body.removeChild(a);
-    // URL.revokeObjectURL(url);
+    setUploading(true);
+    let cid:string
+    try {
+      const uploadRequest = await fetch("/api/files", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: res,
+          fileName: name,
+        }),
+      });
+      cid = await uploadRequest.json();
+      console.log("CID:", cid);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast("Error uploading file. Please try again.");
+      return;
+    } finally {
+      setUploading(false);
+    }
 
     writeContract({
       address: contractaddress,
       abi,
       functionName: "addResource",
-      args: [name, signedUrl, tokenId, "nodata"],
+      args: [name, cid, tokenId],
     })
   }
 
@@ -228,9 +218,6 @@ export default function AddResource({ refetch }:RefetchType) {
             {
               errorInquery && <div className="text-red-500">Error loading NFT keys: {errorInquery.message}</div>
             }
-            {
-              isPending && <div className='text-blue-600'>Transaction is pending...</div>
-            }
           </div>
           <div className="text-sm text-gray-600">
             <p>• File will be encrypted and stored securely</p>
@@ -238,6 +225,9 @@ export default function AddResource({ refetch }:RefetchType) {
             <p>• You can assign access keys after upload</p>
           </div>
         </div>
+        {encrypting && <div className='text-blue-600'>Encrypting Resource...</div>}
+        {uploading && <div className='text-blue-600'>Uploading Resource...</div>}
+        {isPending && <div className='text-blue-600'>Transaction is pending...</div>}
         {
           hash && (
             <div className="mt-4">

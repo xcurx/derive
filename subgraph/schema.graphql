@@ -64,3 +64,26 @@ type Transfer @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type Token @entity(immutable: false) {
+  id: ID!
+  name: String!
+  realOwner: Bytes!
+  currentOwner: Bytes!
+  tokenId: BigInt!
+  resources: [Resource!]! @derivedFrom(field: "tokens")
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Resource @entity(immutable: false) {
+  id: ID!
+  owner: Bytes!
+  name: String!
+  resourceId: Bytes!
+  tokens: [Token!]!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

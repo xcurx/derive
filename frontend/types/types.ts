@@ -17,6 +17,7 @@ export interface Resource {
   name: string;
   tokens?: Token[];
   resourceId: string
+  cid?: string
 }
 
 export interface Token {
@@ -29,4 +30,8 @@ export interface Token {
   blockNumber: number
   blockTimestamp: number
   transactionHash: string
+}
+export interface PinataReturnType extends JSON {
+  encryptedFile: string,
+  name?: string,
 }
