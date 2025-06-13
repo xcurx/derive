@@ -80,7 +80,7 @@ contract Derive is ERC721 {
     }
 
     function removeResource(bytes32 resourceId) external isResourceOwner(resourceId) {
-        require(resources[resourceId].owner == address(0), "Resource already exists");
+        require(resources[resourceId].owner != address(0), "Resource does not exist");
         
         delete resources[resourceId];
         emit ResourceRemoved(msg.sender, resourceId);
@@ -135,6 +135,9 @@ contract Derive is ERC721 {
             reclaimKey(tokenId);
         }
         uint length = access[resourceId].length;
+        if (length == 1) {
+            revert("Cannot remove last token from list");
+        }
         for (uint i=0; i<length; i++) {
             if(access[resourceId][i] == tokenId) {
                 access[resourceId][i] = access[resourceId][length - 1];
@@ -151,5 +154,10 @@ contract Derive is ERC721 {
 
     function share(address receiver, uint tokenId) external {
         safeTransferFrom(msg.sender, receiver, tokenId);
+    }
+
+    function burnKey(uint tokenId) external isOwner(tokenId) {
+        _burn(tokenId);
+        delete keys[tokenId];
     }
 }

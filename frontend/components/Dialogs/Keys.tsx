@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -30,21 +30,19 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
     const [open, setOpen] = useState(false)
     const { address } = useAccount()
     const [tokenId, setTokenId] = useState<number | undefined>(undefined);
-    const contractaddress = process.env.CONTRACT_ADDRESS as `0x${string}`;
+    const contractaddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 
-    const { loading, error:errorInquery, data } = useQuery(GET_OWNED_NFT_KEYS, {
+    const { loading, error:errorInquery, data, refetch } = useQuery(GET_OWNED_NFT_KEYS, {
       variables: {
-        currentOwner: address || zeroAddress // Use zeroAddress if address is not available
+        realOwner: address || zeroAddress // Use zeroAddress if address is not available
       }
     });
-
-    console.log("CA", contractaddress)
 
     const { 
       writeContract,
       data: hash,
       error,
-      // isPending
+      isPending
     } = useWriteContract()
 
     const {
@@ -68,22 +66,43 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
           functionName: "addAccess",
           args: [resourceId, tokenId],
         })
+    }
 
-        if (error) {
-          toast.error(`Error adding key: ${error.message}`);
+    const handleRemoveKey = async (tokenId: number) => {
+        if (!tokenId) {
+          toast.error("Please select a token ID");
           return;
         }
 
-        if (isCreating) {
-          toast.loading("Adding key...");
-        }
-
-        if (isConfirmed) {
-          toast.success("Key added successfully!");
-        //   setOpen(false);
-        //   setTokenId(undefined); // Reset tokenId after adding
-        }
+        writeContract({
+          address: contractaddress,
+          abi,
+          functionName: "removeNFTFromList",
+          args: [resourceId, tokenId],
+        })
     }
+
+    useEffect(() => {
+      if (isConfirmed) {
+        toast.success("Key added successfully!");
+        setTimeout(() => {
+          refetch();
+        }, 1000)
+      }
+      if (error) {
+        toast.error(`Error adding key: ${error.message}`);
+      }
+      if (isPending && !isConfirmed && !error && !isCreating) {
+        toast.loading("Transaction is pending...", {});
+      }
+      if (isCreating && !isConfirmed && !error && !isPending) {
+        toast.loading("Waiting for transaction confirmation", {});
+      }
+
+      return () => {
+        toast.dismiss();
+      }
+    }, [isConfirmed, error, isPending, isCreating, refetch]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -112,7 +131,7 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
                 data && 
                 <Select value={tokenId?.toString()} onValueChange={(e) => setTokenId(Number(e))}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder={"Select a key"}/>
                   </SelectTrigger>
                   <SelectContent>
                     {
@@ -151,7 +170,7 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
                           Reclaim
                         </Button> : null
                     }
-                    <Button size={"sm"}>
+                    <Button size={"sm"} onClick={() => handleRemoveKey(token.tokenId)}>
                       Remove
                     </Button>
                   </div>

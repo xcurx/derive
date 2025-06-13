@@ -35,3 +35,14 @@ export interface PinataReturnType extends JSON {
   encryptedFile: string,
   name?: string,
 }
+export interface KeysDialogProps {
+  tokens:Token[], 
+  resourceId:string
+}
+export interface ShareDialogProps extends RefetchType {
+  token: Token;
+}
+export interface RemoveDialogProps extends RefetchType {
+  resourceId: string;
+}
+  

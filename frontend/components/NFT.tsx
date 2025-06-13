@@ -35,9 +35,9 @@ const NFT = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {data?.sharedNFTKeys.map((nft:Token) => (
-                <Card key={nft.tokenId} className="hover:shadow-lg transition-shadow bg-muted">
+                <Card key={nft.tokenId} className="hover:shadow-lg transition-shadow bg-muted p-0">
                   <CardHeader>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 mt-5">
                       <div>
                         <CardTitle className="text-lg">{nft.name}</CardTitle>
                         <CardDescription className="text-sm text-muted-foreground">Token #{nft.tokenId}</CardDescription>
@@ -48,7 +48,11 @@ const NFT = () => {
                   </CardContent>
                 </Card>
               ))}
-
+              {
+                data?.sharedNFTKeys.length === 0 && !loading && (
+                  <div className="text-gray-500">No NFT keys shared with you</div>
+                )
+              }
               {
                 loading && <div className="text-gray-500">Loading NFT keys...</div>
               }
@@ -72,7 +76,7 @@ const NFT = () => {
                     <div className="flex items-center space-x-2">
                       <div>
                         <CardTitle className="text-lg">{nft.name}</CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground">Token #{nft.tokenId}</CardDescription>
+                        <CardDescription className="text-sm text-muted-foreground">Token #{nft.currentOwner }</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -89,7 +93,11 @@ const NFT = () => {
                   </CardContent>
                 </Card>
               ))}
-
+              {
+                data?.ownedNFTKeys.length === 0 && !loading && (
+                  <div className="text-gray-500">No NFT keys owned by you</div>
+                )
+              }
               {
                 loading && <div className="text-gray-500">Loading NFT keys...</div>
               }
@@ -126,7 +134,11 @@ const NFT = () => {
                   </CardContent>
                 </Card>
               ))}
-
+              {
+                data?.sharedToOthersNFTKeys.length === 0 && !loading && (
+                  <div className="text-gray-500">No NFT keys shared to others</div>
+                )
+              }
               {
                 loading && <div className="text-gray-500">Loading NFT keys...</div>
               }

@@ -1,8 +1,8 @@
 {
   "sepolia": {
     "Derive": {
-      "address": "0xeF6eCf83739E17AC228c70FEea98E6Db38A3E64d",
-      "startBlock": 8531730
+      "address": "0x2fB2B498C76D80756BB9927be93b06AA05926D7f",
+      "startBlock": 8538743
     }
   }
 }

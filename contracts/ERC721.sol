@@ -162,7 +162,7 @@ contract ERC721 is IERC721 {
         emit Transfer(address(0), to, tokenId);
     }
 
-    function burn(uint tokenId) external {
+    function _burn(uint tokenId) internal {
         address owner = _ownerOf[tokenId];
         require(owner != address(0), "Token does not exist");
 

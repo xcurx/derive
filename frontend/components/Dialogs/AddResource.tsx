@@ -142,9 +142,32 @@ export default function AddResource({ refetch }:RefetchType) {
   useEffect(() => {
     if(isConfirmed){
       setName("");
-      refetch();
+      setFile(null);
+      setTokenId(null);
+      setTimeout(() => {
+        refetch()
+      }, 2000)
     }
-  }, [isConfirmed, error, refetch])
+    if(isCreating) {
+      toast.loading("Uploading resource...");
+    }
+    if (error) {
+      toast.error(`Error: ${error.message}`);
+    }
+    if (isPending) {
+      toast.loading("Transaction is pending...");
+    }
+    if (uploading) {
+      toast.loading("Uploading file...");
+    }
+    if (encrypting) {
+      toast.loading("Encrypting file...");
+    }
+
+    return () => {
+      toast.dismiss();
+    }
+  }, [isConfirmed, error, refetch, isPending, isCreating, uploading, encrypting]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -225,18 +248,6 @@ export default function AddResource({ refetch }:RefetchType) {
             <p>• You can assign access keys after upload</p>
           </div>
         </div>
-        {encrypting && <div className='text-blue-600'>Encrypting Resource...</div>}
-        {uploading && <div className='text-blue-600'>Uploading Resource...</div>}
-        {isPending && <div className='text-blue-600'>Transaction is pending...</div>}
-        {
-          hash && (
-            <div className="mt-4">
-              {isCreating && <div className='text-blue-600'>Waiting for confirmation...</div>}
-              {isConfirmed && <div className='text-blue-600'>Resource Successfully Uploaded</div>}
-            </div>
-          )
-        }
-        {error && <div className='text-red-500'>Error: {error.message}</div>}
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel

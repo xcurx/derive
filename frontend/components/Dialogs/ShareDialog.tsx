@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,16 +10,12 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '../ui/button'
 import { Share2 } from 'lucide-react'
-import { RefetchType, Token } from '@/types/types'
+import { ShareDialogProps } from '@/types/types'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { Input } from '../ui/input'
 import { toast } from 'sonner'
 import { abi } from "../../abi.json"
 import { isAddress } from 'viem'
-
-interface ShareDialogProps extends RefetchType {
-  token: Token;
-}
 
 const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
     const [open, setOpen] = useState(false)
@@ -39,15 +35,6 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
       hash
     })
 
-    React.useEffect(() => {
-      if (isConfirmed) {
-        toast.success("Shared successfully!")
-        setValue("")
-        refetch?.()
-        setOpen(false)
-      }
-    }, [isConfirmed, refetch])
-
     const handleShare = async () => {
         if(!value) {
             toast.error("Please enter an address to share with.");
@@ -55,16 +42,39 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
         }
 
         if (!isAddress(value)) {
-          throw new Error('Invalid Ethereum address');
+          toast.error('Invalid Ethereum address');
         }
 
         writeContract({
-          address: "0x73E1873c16eAE9C71a5a3a836EA7553203450AaF",
+          address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
           abi: abi,
           functionName: "share",
           args: [value, token.tokenId],
         })
     }
+
+    useEffect(() => {
+        if (isConfirmed) {
+          toast.success("Key shared successfully!");
+          setValue("")
+          setTimeout(() => {
+            refetch();
+          }, 1000)
+        }
+        if (error) {
+          toast.error(`Error adding key: ${error.message}`);
+        }
+        if (isPending && !isConfirmed && !error && !isCreating) {
+          toast.loading("Transaction is pending...", {});
+        }
+        if (isCreating && !isConfirmed && !error && !isPending) {
+          toast.loading("Waiting for transaction confirmation", {});
+        }
+  
+        return () => {
+          toast.dismiss();
+        }
+    }, [isConfirmed, error, isPending, isCreating, refetch])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -87,18 +97,6 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
             <div>
                 <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder='Enter address'/>
             </div>
-            {
-                isPending && <p className="text-sm text-gray-500 mt-2">Sharing in progress...</p>
-            }
-            {
-                isCreating && <p className="text-sm text-gray-500 mt-2">Transaction is being processed...</p>
-            }
-            {
-                isConfirmed && <p className="text-sm text-green-500 mt-2">Shared successfully!</p>
-            }
-            {
-                error && <p className="text-sm text-red-500 mt-2">Error: {error.message}</p>
-            }
           </div>
         </div>
         <DialogFooter>

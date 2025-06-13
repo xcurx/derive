@@ -1,13 +1,13 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Download, FileText, Users } from 'lucide-react'
+import { FileText, Users } from 'lucide-react'
 import { useAccount } from 'wagmi'
 import { useQuery } from '@apollo/client'
 import { GET_SHARED_RESOURCES } from '@/graphql/queries'
 import { Resource } from '@/types/types'
 // import Keys from './Dialogs/Keys'
 // import Manage from './Dialogs/Manage'
-import { Button } from './ui/button'
+import OpenResource from './Dialogs/OpenResource'
 
 
 const Share = () => {
@@ -32,15 +32,19 @@ const Share = () => {
         <h2 className="text-2xl font-bold">Shared Access</h2>
         <Card>
           <CardHeader>
-            <CardTitle>Keys Shared With You</CardTitle>
-            <CardDescription>NFT keys that others have shared with you</CardDescription>
+            <CardTitle>Shared Resources</CardTitle>
+            <CardDescription>Resources shared with you</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No shared keys yet</p>
-              <p className="text-sm">Keys shared with you will appear here</p>
-            </div>
+           {
+            data.resources?.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No shared keys yet</p>
+                  <p className="text-sm">Keys shared with you will appear here</p>
+                </div>
+            ) : null
+           }
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {
                 data.resources?.map((resource:Resource) => (
@@ -55,21 +59,8 @@ const Share = () => {
                       </CardDescription> */}
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Required Keys:</span>
-                        <Badge variant="secondary">{resource.requiredKeys.length}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Access Count:</span>
-                        <span className="text-sm font-medium">{resource.accessCount}</span>
-                      </div> */}
                       <div className="flex space-x-2">
-                        {/* <Keys tokens={resource.tokens || []} resourceId={resource.resourceId}/>
-                        <Manage tokens={resource.tokens || []}/> */}
-                        <Button size="sm" variant="outline">
-                          <Download className="mr-1 h-3 w-3" />
-                          Download
-                        </Button>
+                        <OpenResource resourceId={resource.resourceId}/>
                       </div>
                     </CardContent>
                   </Card>

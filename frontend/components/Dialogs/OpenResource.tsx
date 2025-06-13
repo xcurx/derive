@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -91,6 +91,26 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
       }
     }
 
+    useEffect(() => {
+        if (loadingData) {
+          toast.loading("Loading resource data...");
+        } else {
+          toast.dismiss();
+        }
+        if (decrypting) {
+          toast.loading("Decrypting resource...");
+        } else {
+          toast.dismiss();
+        }
+        if (isError) {
+          toast.error(`Error: ${error.message}`);
+        }
+
+        return () => {
+          toast.dismiss();
+        }
+    }, [loadingData, decrypting, resource, isError, error])
+
      return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -117,18 +137,12 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
                 You have access to this resource
               </div>
             ) : (
-              <div>No resource found</div>
-            )
-          }
-          {
-            loadingData ? (
-              <div>Loading resource data...</div>
-            ) : decrypting ? (
-              <div>Decrypting resource...</div>
-            ) : (
-              <div className="text-sm text-gray-500">
-                Click &quot;`Open&quot;` to download and decrypt the resource.
-              </div>
+              <>
+                <div>No resource found</div>
+                <div className="text-sm text-gray-500">
+                  Click &quot;`Open&quot;` to download and decrypt the resource.
+                </div>
+              </>
             )
           }
         </div>

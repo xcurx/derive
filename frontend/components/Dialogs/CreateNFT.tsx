@@ -53,10 +53,26 @@ const CreateNFT = ({ refetch }:RefetchType) => {
 
     useEffect(() => {
       if(isConfirmed){
+        toast.success("NFT Key created successfully!");
         setName("");
-        refetch();
+        setTimeout(() => {
+          refetch();
+        }, 1000)
       }
-    }, [isConfirmed, error, refetch])
+      if(isCreating) {
+        toast.loading("Creating NFT Key...");
+      }
+      if (error) {
+        toast.error(`Error: ${error.message}`);
+      }
+      if (isPending) {
+        toast.loading("Transaction is pending...");
+      }
+
+      return () => {
+        toast.dismiss();
+      }
+    }, [isConfirmed, error, refetch, isPending, isCreating]);
 
   return (
      <Dialog open={open} onOpenChange={setOpen}>
@@ -83,15 +99,6 @@ const CreateNFT = ({ refetch }:RefetchType) => {
             <p>• Token ID will be automatically assigned</p>
           </div>
         </div> 
-        {
-          hash && (
-           <div>
-              {/* Transaction Hash: {hash} */}
-              {isCreating && <div className='text-blue-600'>Waiting for confirmation...</div>}
-              {isConfirmed && <div className='text-blue-600'>NFT Successfully Created</div>}
-            </div>
-          )
-        }
         {error && <div className='text-red-500'>Error: {error.message}</div>}
         {isPending && <div className='text-blue-600'>Transaction is pending...</div>}
         <DialogFooter>

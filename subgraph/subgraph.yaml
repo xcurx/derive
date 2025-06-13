@@ -8,9 +8,9 @@ dataSources:
     name: Derive
     network: sepolia
     source:
-      address: "0xeF6eCf83739E17AC228c70FEea98E6Db38A3E64d"
+      address: "0x2fB2B498C76D80756BB9927be93b06AA05926D7f"
       abi: Derive
-      startBlock: 8531730
+      startBlock: 8538743
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9

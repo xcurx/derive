@@ -6,9 +6,9 @@ import { useAccount } from 'wagmi'
 import { GET_RESOURCES } from '@/graphql/queries'
 import { useQuery } from '@apollo/client'
 import { Resource } from '@/types/types'
-import Manage from './Dialogs/Manage'
 import Keys from './Dialogs/Keys'
 import OpenResource from './Dialogs/OpenResource'
+import Remove from './Dialogs/Remove'
 
 const Resources = () => {
     const { address } = useAccount()
@@ -38,7 +38,7 @@ const Resources = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Resources created by you</CardTitle>
+            <CardTitle>Resources uploaded by you</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -56,22 +56,23 @@ const Resources = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Required Keys:</span>
-                      <Badge variant="secondary">{resource.requiredKeys.length}</Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Access Count:</span>
-                      <span className="text-sm font-medium">{resource.accessCount}</span>
-                    </div> */}
                     <div className="flex space-x-2">
                       <Keys tokens={resource.tokens || []} resourceId={resource.resourceId}/>
-                      <Manage tokens={resource.tokens || []}/>
                       <OpenResource resourceId={resource.resourceId}/>
+                      <Remove resourceId={resource.resourceId} refetch={refetch}/>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {
+                data.resources.length === 0 && (
+                  <div className="text-center py-8 text-gray-500 col-span-full">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No resources uploaded yet</p>
+                    <p className="text-sm">Upload your first resource to get started</p>
+                  </div>
+                )
+              }
             </div>
           </CardContent>
         </Card>
