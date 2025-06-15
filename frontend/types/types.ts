@@ -35,6 +35,15 @@ export interface PinataReturnType extends JSON {
   encryptedFile: string,
   name?: string,
 }
+
+export interface CreateNFTKeyProps extends RefetchType {
+  quickCreate?: boolean;
+}
+
+export interface AddResourceProps extends RefetchType {
+  quickUpload?: boolean;
+}
+
 export interface KeysDialogProps {
   tokens:Token[], 
   resourceId:string
@@ -44,5 +53,8 @@ export interface ShareDialogProps extends RefetchType {
 }
 export interface RemoveDialogProps extends RefetchType {
   resourceId: string;
+}
+export interface BurnDialogProps extends RefetchType {
+  tokenId: number;
 }
   

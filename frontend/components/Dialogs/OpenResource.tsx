@@ -70,7 +70,6 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
         const lit = new Lit("sepolia");
         await lit.connect();
         const res = await lit.decryptFile(JSON.parse((fileData as PinataReturnType).encryptedFile))
-        console.log("Decrypted file:", res);
   
         const blob = new Blob([res.slice()], { type: 'application/octet-stream' });
   

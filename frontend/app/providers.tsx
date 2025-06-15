@@ -19,7 +19,7 @@ export function Providers({ children, initialState }: Props) {
   const [queryClient] = useState(() => new QueryClient());
 
   const client = new ApolloClient({
-    uri: 'https://api.studio.thegraph.com/query/112592/first/version/latest',
+    uri: 'https://api.studio.thegraph.com/query/112592/derive/version/latest',
     cache: new InMemoryCache(),
   }); 
 

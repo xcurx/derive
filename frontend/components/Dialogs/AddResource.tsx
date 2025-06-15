@@ -27,10 +27,13 @@ import { abi } from "../../abi.json"
 import { encodeAbiParameters, keccak256, parseAbiParameters, zeroAddress } from 'viem'
 import { GET_MY_NFT_KEYS } from "@/graphql/queries"
 import { useQuery } from "@apollo/client"
-import { RefetchType, Token } from "@/types/types"
+import { AddResourceProps, Token } from "@/types/types"
 import { Lit } from "@/lit"
+import { useDispatch } from "react-redux"
+import { setResourceRefetch, setTokenRefetch } from "@/store/refetchSlice"
+import { useAppSelector } from "@/store/store"
 
-export default function AddResource({ refetch }:RefetchType) {
+export default function AddResource({ refetch, quickUpload }:AddResourceProps) {
   const [name, setName] = useState("")
   const [file, setFile] = useState<File | null>(null)
   const [tokenId, setTokenId] = useState<number | null>(null);
@@ -39,8 +42,10 @@ export default function AddResource({ refetch }:RefetchType) {
   const { address } = useAccount()
   const [uploading, setUploading] = useState(false)
   const [encrypting, setEncrypting] = useState(false)
+  const dispatch = useDispatch()
+  const shouldRefetch = useAppSelector((state) => state.refetch.token)
 
-  const { loading, error:errorInquery, data } = useQuery(GET_MY_NFT_KEYS, {
+  const { loading, error:errorInquery, data, refetch:refetchTokens } = useQuery(GET_MY_NFT_KEYS, {
     variables: {
       realOwner: address || zeroAddress
     }
@@ -123,8 +128,7 @@ export default function AddResource({ refetch }:RefetchType) {
       });
       cid = await uploadRequest.json();
       console.log("CID:", cid);
-    } catch (error) {
-      console.error("Error uploading file:", error);
+    } catch {
       toast("Error uploading file. Please try again.");
       return;
     } finally {
@@ -144,9 +148,13 @@ export default function AddResource({ refetch }:RefetchType) {
       setName("");
       setFile(null);
       setTokenId(null);
+      dispatch(setResourceRefetch({
+        dashboard: true,
+        resourcesTab: true
+      }))
       setTimeout(() => {
         refetch()
-      }, 2000)
+      }, 3000)
     }
     if(isCreating) {
       toast.loading("Uploading resource...");
@@ -167,15 +175,38 @@ export default function AddResource({ refetch }:RefetchType) {
     return () => {
       toast.dismiss();
     }
-  }, [isConfirmed, error, refetch, isPending, isCreating, uploading, encrypting]);
+  }, [isConfirmed, error, refetch, isPending, isCreating, uploading, encrypting, dispatch]);
+
+  useEffect(() => {
+    if (shouldRefetch.resourcesTab) {
+      refetchTokens();
+      dispatch(setTokenRefetch({
+        resourcesTab: false,
+        dashboard: shouldRefetch.dashboard,
+        tokensTab: shouldRefetch.tokensTab
+      }));
+    }
+  }, [shouldRefetch, refetchTokens, dispatch]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
        <DialogTrigger asChild>
-        <Button>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Resource
-        </Button>
+        {
+          !quickUpload ? (
+            <Button>
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Resource
+            </Button>
+          ) : (
+            <Button 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Resource
+            </Button>
+          )
+        }
       </DialogTrigger>      
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

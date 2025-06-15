@@ -1,6 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Flame } from 'lucide-react'
-import { Button } from './ui/button'
 import CreateNFT from './Dialogs/CreateNFT'
 import { useQuery } from '@apollo/client';
 import { useAccount } from 'wagmi'
@@ -9,6 +7,7 @@ import { GET_NFT_KEYS } from "@/graphql/queries";
 import { Token } from "@/types/types";
 import ShareDialog from "./Dialogs/ShareDialog";
 import Reclaim from "./Dialogs/Reclaim";
+import Burn from "./Dialogs/Burn";
 
 const NFT = () => {
     const { address } = useAccount()
@@ -76,7 +75,7 @@ const NFT = () => {
                     <div className="flex items-center space-x-2">
                       <div>
                         <CardTitle className="text-lg">{nft.name}</CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground">Token #{nft.currentOwner }</CardDescription>
+                        <CardDescription className="text-sm text-muted-foreground">Token #{nft.tokenId }</CardDescription>
                       </div>
                     </div>
                   </CardHeader>
@@ -85,10 +84,7 @@ const NFT = () => {
                     </div>
                     <div className="flex space-x-2">
                       <ShareDialog token={nft} refetch={refetch}/>
-                      <Button size="sm" variant="destructive">
-                        <Flame className="mr-1 h-3 w-3" />
-                        Burn
-                      </Button>
+                      <Burn tokenId={nft.tokenId} refetch={refetch}/>
                     </div>
                   </CardContent>
                 </Card>

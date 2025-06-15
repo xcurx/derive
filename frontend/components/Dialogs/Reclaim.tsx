@@ -21,7 +21,7 @@ interface ReclaimDialogProps extends RefetchType {
 
 const Reclaim = ({ tokenId, refetch }:ReclaimDialogProps) => {
     const [open, setOpen] = useState(false)
-    const contractaddress = "0x73E1873c16eAE9C71a5a3a836EA7553203450AaF";
+    const contractaddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 
     const { 
       writeContract,

@@ -59,45 +59,46 @@ export class Lit {
       uses: '100',
       dAppOwnerWallet: walletWithCapacityCredit,
       capacityTokenId: process.env.NEXT_PUBLIC_LIT_CAPACITY_TOKEN_ID,
+      expiration: new Date(Date.now() + 10 * 1000).toISOString() // 1 second
     });
 
     this.capacityDelegationAuthSig = capacityDelegationAuthSig;
   }
 
   async #getSessionSignatures() {
-    
+    this.connect();
     const provider = new providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const walletAddress = await signer.getAddress();
-    const latestBlockhash = await this.litNodeClient.getLatestBlockhash();
     await this.#initContractClient();
-
+    
     const authNeededCallback = async(params:any) => {
-       if (!params.uri) {
-         throw new Error("uri is required");
-       }
-       if (!params.expiration) {
-         throw new Error("expiration is required");
-       }
-  
-       if (!params.resourceAbilityRequests) {
-         throw new Error("resourceAbilityRequests is required");
-       }
-   
+      if (!params.uri) {
+        throw new Error("uri is required");
+      }
+      if (!params.expiration) {
+        throw new Error("expiration is required");
+      }
+      
+      if (!params.resourceAbilityRequests) {
+        throw new Error("resourceAbilityRequests is required");
+      }
+      
+      const latestBlockhash = await this.litNodeClient.getLatestBlockhash();
        // Create the SIWE message
        const toSign = await createSiweMessageWithRecaps({
          uri: params.uri,
          expiration: params.expiration,
-         resources: params.resourceAbilityRequests, 
-         walletAddress: walletAddress as string,
+         resources: params.resourceAbilityRequests,
+         walletAddress: walletAddress,
          nonce: latestBlockhash,
          litNodeClient: this.litNodeClient,
        });
   
        // Generate the authSig
        const authSig = await generateAuthSig({
-         signer: signer,
+         signer,
          toSign,
        });
   
@@ -117,6 +118,7 @@ export class Lit {
         ],
         authNeededCallback,
         capacityDelegationAuthSig: this.capacityDelegationAuthSig,
+        expiration: new Date(Date.now() + 10 * 1000).toISOString() // 10 seconds
     });
     return sessionSigs;
   }
@@ -132,12 +134,15 @@ export class Lit {
         }
       ]
 
-      return await encryptToJson({
+      const encryptedFile = await encryptToJson({
           file,
           evmContractConditions: updatedEvmContractConditions,
           chain:"sepolia",
           litNodeClient: this.litNodeClient,
       });
+      this.litNodeClient.disconnect();
+
+      return encryptedFile;
   }
 
   async decryptFile(json:Props) {
@@ -148,6 +153,8 @@ export class Lit {
         sessionSigs,
       },
     );
+    this.litNodeClient.disconnect();
+    
 
     return decryptedFile;
   }

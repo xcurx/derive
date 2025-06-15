@@ -14,12 +14,16 @@ import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { Plus } from 'lucide-react';
 import { Input } from '../ui/input';
 import { toast } from 'sonner';
-import { RefetchType } from '@/types/types';
+import { CreateNFTKeyProps } from '@/types/types';
+import { setTokenRefetch } from '@/store/refetchSlice';
+import { useDispatch } from 'react-redux';
 
-const CreateNFT = ({ refetch }:RefetchType) => {
+const CreateNFT = ({ refetch, quickCreate }:CreateNFTKeyProps) => {
     const [open, setOpen] = useState(false)
     const [name, setName] = useState("")
     const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+    const dispatch = useDispatch()
+    
 
     console.log("Contract Address:", contractAddress)
 
@@ -55,9 +59,14 @@ const CreateNFT = ({ refetch }:RefetchType) => {
       if(isConfirmed){
         toast.success("NFT Key created successfully!");
         setName("");
+        dispatch(setTokenRefetch({
+          dashboard: true,
+          resourcesTab: true,
+          tokensTab: true
+        }));
         setTimeout(() => {
           refetch();
-        }, 1000)
+        }, 3000)
       }
       if(isCreating) {
         toast.loading("Creating NFT Key...");
@@ -72,15 +81,27 @@ const CreateNFT = ({ refetch }:RefetchType) => {
       return () => {
         toast.dismiss();
       }
-    }, [isConfirmed, error, refetch, isPending, isCreating]);
+    }, [isConfirmed, error, refetch, isPending, isCreating, dispatch]);
 
   return (
      <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Create NFT Key  
-        </Button>
+        {
+          !quickCreate ? (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Create NFT Key  
+            </Button>
+          ) : (
+            <Button 
+              className="w-full justify-start"
+              variant="outline"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create NFT Key
+            </Button>
+          )
+        }
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -98,14 +119,12 @@ const CreateNFT = ({ refetch }:RefetchType) => {
             <p>• NFT will be minted to your address</p>
             <p>• Token ID will be automatically assigned</p>
           </div>
-        </div> 
-        {error && <div className='text-red-500'>Error: {error.message}</div>}
-        {isPending && <div className='text-blue-600'>Transaction is pending...</div>}
+        </div>  
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={mint} disabled={isCreating || isConfirmed || isPending} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={mint} disabled={isCreating || isPending} className="bg-blue-600 hover:bg-blue-700 text-white">
             {isCreating ? "Creating..." : "Create NFT Key"}
           </Button>
         </DialogFooter>

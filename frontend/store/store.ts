@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import nft from "./nftSlice";
+import refetch from "./refetchSlice";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 
 const store = configureStore({
     reducer:{
-        nft
+        refetch
     }
 });
 

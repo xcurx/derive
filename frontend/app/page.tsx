@@ -2,43 +2,16 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet } from 'lucide-react'
-// import WalletConnection from "@/components/wallet-connection"
-// import CreateNFTModal from "@/components/create-nft-modal"
-// import AddResourceModal from "@/components/add-resource-modal"
-// import AssignKeysModal from "@/components/assign-keys-modal"
-// import ShareKeyModal from "@/components/share-key-modal"
-// import ManageKeysModal from "@/components/manage-keys-modal"
 import Dashboard from "@/components/Dashboard"
 import Resources from "@/components/Resources"
 import NFT from "@/components/NFT"
 import Share from "@/components/Share"
 import { useAccount } from "wagmi"
 
-// Mock data types
-export interface NFTKey {
-  id: string
-  name: string
-  description: string
-  tokenId: string
-  owner: string
-  transferable: boolean
-  createdAt: string
-}
-
-export interface Resource {
-  id: string
-  name: string
-  type: 'document' | 'image' | 'video' | 'audio' | 'archive'
-  size: string
-  uploadedAt: string
-  requiredKeys: string[]
-  accessCount: number
-}
-
 export default function Component() {
-  const { isConnected, status } = useAccount()
+  const { isConnected, chain } = useAccount()
 
-  console.log("Wallet State:", status);
+  console.log("isConnected:", chain)
 
   if (!isConnected) {
     return (
@@ -50,14 +23,24 @@ export default function Component() {
     )
   }
 
+  if (chain?.name !== "Sepolia") {
+    return (
+      <div className="text-center py-20">
+        <Wallet className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-gray-300 mb-2">Switch to the Sepolia Testnet</h2>
+        <p className="text-gray-400 mb-6">Please switch to the correct network to access the platform</p>
+      </div>
+    )
+  }
+
   return (
      <main className="container mx-auto px-4 py-8">
           <Tabs defaultValue="dashboard" className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
-              <TabsTrigger value="nfts">NFT Keys</TabsTrigger>
-              <TabsTrigger value="shared">Shared Access</TabsTrigger>
+              <TabsTrigger value="dashboard" className="text-xs sm:text-sm">Dashboard</TabsTrigger>
+              <TabsTrigger value="resources" className="text-xs sm:text-sm">Resources</TabsTrigger>
+              <TabsTrigger value="nfts" className="text-xs sm:text-sm">NFT Keys</TabsTrigger>
+              <TabsTrigger value="shared" className="text-xs sm:text-sm">Shared Access</TabsTrigger>
             </TabsList>
 
             {/* Dashboard Tab */}

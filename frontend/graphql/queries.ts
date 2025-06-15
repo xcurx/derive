@@ -105,3 +105,23 @@ export const GET_SHARED_RESOURCES = gql`
     resourceId
   }}
 `;
+
+export const GET_ACCESSIBLE_RESOURCES = gql`
+  query GetAccessibleResources($add: String!) {
+    sharedResources: resources(
+      where: {tokens_: {currentOwner: $add, realOwner_not: $add}}
+    ) {
+      id
+    }
+
+    ownedResources: resources(where: {owner: $add}) {
+      id
+    }
+
+    sharedToOthersResources: resources(
+      where: {tokens_: {currentOwner_not: $add, realOwner: $add}}
+    ) {
+      id
+    }
+  }
+`

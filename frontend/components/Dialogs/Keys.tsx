@@ -34,7 +34,7 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
 
     const { loading, error:errorInquery, data, refetch } = useQuery(GET_OWNED_NFT_KEYS, {
       variables: {
-        realOwner: address || zeroAddress // Use zeroAddress if address is not available
+        realOwner: address || zeroAddress
       }
     });
 

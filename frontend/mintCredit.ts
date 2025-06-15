@@ -3,9 +3,7 @@ import { LIT_NETWORK, LIT_RPC } from "@lit-protocol/constants";
 import { providers, Wallet } from 'ethers';
 
 async function mintNFT() {
-  // IMPORTANT: Load your private key securely from an .env file
-  // This script runs on your machine, NOT in the browser.
-  const privateKey = "0x877f5feed36d74772c9d8654399cf70f07f59c1af7ef0d90628218ad65cae1d6";
+  const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY;
   console.log(privateKey);
   if (!privateKey) {
     throw new Error("LIT_PAYER_PRIVATE_KEY is not set in your .env file.");
@@ -43,7 +41,7 @@ async function mintNFT() {
     console.log(`NEXT_PUBLIC_LIT_CAPACITY_TOKEN_ID=${capacityTokenIdStr}`);
 
   } catch (err) {
-    console.error("🔥 Failed to mint NFT:", err);
+    console.error("Failed to mint NFT:", err);
   }
 }
 

@@ -59,7 +59,7 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
           setValue("")
           setTimeout(() => {
             refetch();
-          }, 1000)
+          }, 3000)
         }
         if (error) {
           toast.error(`Error adding key: ${error.message}`);
