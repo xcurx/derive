@@ -44,17 +44,60 @@ export interface AddResourceProps extends RefetchType {
   quickUpload?: boolean;
 }
 
-export interface KeysDialogProps {
+export interface KeysDialogProps extends RefetchType {
   tokens:Token[], 
   resourceId:string
 }
 export interface ShareDialogProps extends RefetchType {
   token: Token;
 }
+
+export interface ReclaimDialogProps extends RefetchType {
+  tokenId: number
+}
 export interface RemoveDialogProps extends RefetchType {
   resourceId: string;
 }
 export interface BurnDialogProps extends RefetchType {
   tokenId: number;
+}
+
+export interface EventEntity {
+  blockNumber: number
+  blockTimestamp: number
+  id: string
+  owner: string
+  eventType: string
+  accessAdded?: {
+    resourceId: string
+    tokenId: number
+  }
+  creation?: {
+    name: string
+    owner: string
+    tokenId: number
+  }
+  keyReclaimed?: {
+    prevOwner: string
+    tokenId: number
+  }
+  removedFromList?: {
+    resourceId: string
+    tokenId: number
+  }
+  resourceAdded?: {
+    name: string
+    owner: string
+    resourceId: string
+  }
+  resourceRemoved?: {
+    owner: string
+    resourceId: string
+  }
+  transfer?: {
+    from: string
+    internal_id: number
+    to: string
+  }
 }
   

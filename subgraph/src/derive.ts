@@ -17,14 +17,14 @@ import {
   ResourceAdded,
   ResourceRemoved,
   Token,
-  Transfer
+  Transfer,
+  EventEntity
 } from "../generated/schema"
 
 function getTokenId(contractAddress: Bytes, tokenId: BigInt): string {
   return contractAddress.toHex() + "-" + tokenId.toString();
 }
 
-// Helper function for consistent Resource ID generation
 function getResourceId(contractAddress: Bytes, resourceId: Bytes): string {
   return contractAddress.toHex() + "-" + resourceId.toString();
 }
@@ -53,6 +53,15 @@ export function handleAccessAdded(event: AccessAddedEvent): void {
       resource.save();
     }
   }
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "AccessAdded";
+  eventEntity.owner = resource ? resource.owner : Bytes.empty();
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.accessAdded = entity.id;
+  eventEntity.save();
 }
 
 export function handleCreation(event: CreationEvent): void {
@@ -81,6 +90,15 @@ export function handleCreation(event: CreationEvent): void {
   token.blockTimestamp = event.block.timestamp
   token.transactionHash = event.transaction.hash
   token.save();
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "Creation";
+  eventEntity.owner = event.params.owner;
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.creation = entity.id;
+  eventEntity.save();
 }
 
 export function handleKeyReclaimed(event: KeyReclaimedEvent): void {
@@ -95,6 +113,17 @@ export function handleKeyReclaimed(event: KeyReclaimedEvent): void {
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  const token = Token.load(getTokenId(event.address, event.params.tokenId));
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "KeyReclaimed";
+  eventEntity.owner = token ? token.realOwner : Bytes.empty();
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.keyReclaimed = entity.id;
+  eventEntity.save();
 }
 
 export function handleRemovedFromList(event: RemovedFromListEvent): void {
@@ -127,6 +156,15 @@ export function handleRemovedFromList(event: RemovedFromListEvent): void {
     resource.tokens = updatedTokens;
     resource.save();
   }
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "RemovedFromList";
+  eventEntity.owner = resource ? resource.owner : Bytes.empty();
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.removedFromList = entity.id;
+  eventEntity.save();
 }
 
 export function handleResourceAdded(event: ResourceAddedEvent): void {
@@ -156,6 +194,15 @@ export function handleResourceAdded(event: ResourceAddedEvent): void {
   resource.blockTimestamp = event.block.timestamp
   resource.transactionHash = event.transaction.hash
   resource.save()
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "ResourceAdded";
+  eventEntity.owner = event.params.owner;
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.resourceAdded = entity.id;
+  eventEntity.save();
 }
 
 export function handleResourceRemoved(event: ResourceRemovedEvent): void {
@@ -172,7 +219,16 @@ export function handleResourceRemoved(event: ResourceRemovedEvent): void {
   entity.save()
 
   let resourceId = getResourceId(event.address, event.params.resourceId)
-  store.remove("Resource", resourceId); 
+  store.remove("Resource", resourceId);
+
+  let eventEntity = new EventEntity(entity.id);
+  eventEntity.eventType = "ResourceRemoved";
+  eventEntity.owner = event.params.owner;
+  eventEntity.blockNumber = event.block.number;
+  eventEntity.blockTimestamp = event.block.timestamp;
+  eventEntity.transactionHash = event.transaction.hash;
+  eventEntity.resourceRemoved = entity.id;
+  eventEntity.save();
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -200,5 +256,15 @@ export function handleTransfer(event: TransferEvent): void {
       token.currentOwner = event.params.to;
       token.save();
     }
+    if(token.realOwner == event.params.from){
+      let eventEntity = new EventEntity(entity.id);
+      eventEntity.eventType = "Transfer";
+      eventEntity.owner = token ? token.realOwner : Bytes.empty();
+      eventEntity.blockNumber = event.block.number;
+      eventEntity.blockTimestamp = event.block.timestamp;
+      eventEntity.transactionHash = event.transaction.hash;
+      eventEntity.transfer = entity.id;
+      eventEntity.save();
+    } 
   }
 }

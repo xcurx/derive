@@ -19,8 +19,6 @@ const Resources = () => {
       }
     });
 
-    console.log("Resources data:", data);
-
     if(loading) {
       return <div>Loading</div>
     }
@@ -41,7 +39,7 @@ const Resources = () => {
             <CardTitle>Resources uploaded by you</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-2 xl:gap-6">
               {data.resources.map((resource:Resource) => (
                 <Card key={resource.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
@@ -57,7 +55,7 @@ const Resources = () => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex space-x-2">
-                      <Keys tokens={resource.tokens || []} resourceId={resource.resourceId}/>
+                      <Keys tokens={resource.tokens || []} resourceId={resource.resourceId} refetch={refetch}/>
                       <OpenResource resourceId={resource.resourceId}/>
                       <Remove resourceId={resource.resourceId} refetch={refetch}/>
                     </div>
@@ -66,7 +64,7 @@ const Resources = () => {
               ))}
               {
                 data.resources.length === 0 && (
-                  <div className="text-center py-8 text-gray-500 col-span-full">
+                  <div className="text-center py-8 text-gray-500 col-span-full ">
                     <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No resources uploaded yet</p>
                     <p className="text-sm">Upload your first resource to get started</p>

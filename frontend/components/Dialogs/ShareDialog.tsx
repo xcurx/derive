@@ -16,10 +16,13 @@ import { Input } from '../ui/input'
 import { toast } from 'sonner'
 import { abi } from "../../abi.json"
 import { isAddress } from 'viem'
+import { useDispatch } from 'react-redux'
+import { setTokenRefetch } from '@/store/refetchSlice'
 
 const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
     const [open, setOpen] = useState(false)
     const [value, setValue] = useState("")
+    const dispatch = useDispatch();
 
     const { 
       writeContract,
@@ -60,9 +63,14 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
           setTimeout(() => {
             refetch();
           }, 3000)
+          dispatch(setTokenRefetch({
+            dashboard: true,
+            resourcesTab: true,
+            tokensTab: true,
+          }))
         }
         if (error) {
-          toast.error(`Error adding key: ${error.message}`);
+          toast.error(`Error adding key: ${error.cause}`);
         }
         if (isPending && !isConfirmed && !error && !isCreating) {
           toast.loading("Transaction is pending...", {});
@@ -74,7 +82,7 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
         return () => {
           toast.dismiss();
         }
-    }, [isConfirmed, error, isPending, isCreating, refetch])
+    }, [isConfirmed, error, isPending, isCreating, refetch, dispatch])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

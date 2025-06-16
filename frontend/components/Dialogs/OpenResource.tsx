@@ -11,7 +11,6 @@ import {
 import { Button } from '../ui/button'
 import { Download } from 'lucide-react'
 import { useAccount, useReadContract } from 'wagmi'
-import { PinataSDK } from "pinata";
 import { abi } from "../../abi.json"
 import { Lit } from '@/lit'
 import { PinataReturnType, Resource } from '@/types/types'
@@ -19,15 +18,9 @@ import { toast } from 'sonner'
 
 const OpenResource = ({ resourceId }:{ resourceId:string }) => {
     const [open, setOpen] = useState(false)
-    console.log("OpenResource resourceId:", resourceId)
     const { address } = useAccount()
     const [loadingData, setLoadingData] = useState(false)
     const [decrypting, setDecrypting] = useState(false)
-
-    const pinata = new PinataSDK({
-      pinataJwt: process.env.PINATA_JWT!,
-      pinataGateway: process.env.NEXT_PUBLIC_GATEWAY_URL || "https://gateway.pinata.cloud",
-    });
     
     const { 
       data: resource,
@@ -54,9 +47,18 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
       let fileData: JSON
       setLoadingData(true);
       try {
-        const { data } = await pinata.gateways.public.get(
-          (resource as Resource).cid as string,
-        )
+        const res = await fetch(`/api/get-resource`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ cid: (resource as Resource).cid }),
+        });
+        if (!res.ok) {
+          toast.error(`Failed to fetch resource: ${res.statusText}`);
+          return;
+        }
+        const { data }= await res.json();
         fileData = data as JSON;
       } catch {
         toast.error("Failed to fetch resource");
@@ -102,7 +104,7 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
           toast.dismiss();
         }
         if (isError) {
-          toast.error(`Error: ${error.message}`);
+          toast.error(`Error: ${error.cause}`);
         }
 
         return () => {
@@ -113,7 +115,7 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
      return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button size={"sm"} variant="outline">
           <Download className="mr-1 h-3 w-3" />
           Open
         </Button>

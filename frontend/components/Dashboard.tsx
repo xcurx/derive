@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { setResourceRefetch, setTokenRefetch } from "@/store/refetchSlice";
 import CreateNFT from "./Dialogs/CreateNFT";
 import AddResource from "./Dialogs/AddResource";
+import Activity from "./Activity";
 
 const Dashboard = () => {
   const { address } = useAccount();
@@ -28,7 +29,6 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    console.log("re", shouldRefetch.resource);
     if (shouldRefetch.resource.dashboard) {
       refetchResources();
       dispatch(setResourceRefetch({
@@ -36,7 +36,6 @@ const Dashboard = () => {
         resourcesTab: shouldRefetch.resource.resourcesTab
       }));
     }
-    console.log("re", shouldRefetch.token);
     if (shouldRefetch.token.dashboard) {
       refetchTokens();
       dispatch(setTokenRefetch({
@@ -128,26 +127,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest platform activity</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Resource uploaded: Design Assets.zip</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">NFT Key created: Premium Access Key</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span className="text-sm">Key shared with 0x9876...4321</span>
-              </div>
-            </CardContent>
-          </Card>
+          <Activity shouldRefetch={shouldRefetch.resource.dashboard || shouldRefetch.token.dashboard}/>
         </div>
     </>
   )

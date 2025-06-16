@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Wallet, LogOut } from 'lucide-react'
 import { toast } from "sonner"
-// import { useAppSelector } from "@/store/store"
-// import { connect, disconnect, update } from "@/store/walletSlice"
 import { useAccount, useAccountEffect, useConnect, useDisconnect } from "wagmi"
 
 export default function WalletConnection() {

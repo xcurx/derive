@@ -125,3 +125,51 @@ export const GET_ACCESSIBLE_RESOURCES = gql`
     }
   }
 `
+
+export const GET_ACTIVITY = gql`
+  query GetActivity($add: String!) {
+    eventEntities(
+      where: {owner: $add}
+      orderBy: blockTimestamp
+      orderDirection: desc
+      first: 5
+    ) {
+      blockNumber
+      blockTimestamp
+      id
+      owner
+      eventType
+      accessAdded {
+        resourceId
+        tokenId
+      }
+      creation {
+        name
+        owner
+        tokenId
+      }
+      keyReclaimed {
+        prevOwner
+        tokenId
+      }
+      removedFromList {
+        resourceId
+        tokenId
+      }
+      resourceAdded {
+        name
+        owner
+        resourceId
+      }
+      resourceRemoved {
+        owner
+        resourceId
+      }
+      transfer {
+        from
+        internal_id
+        to
+      }
+    }
+  }
+`

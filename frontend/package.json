@@ -28,7 +28,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "graphql": "^16.11.0",
-    "ipfs-only-hash": "^4.0.0",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "next-themes": "^0.4.6",

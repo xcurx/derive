@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,16 +12,16 @@ import { Button } from '../ui/button'
 import { Share2 } from 'lucide-react'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { abi } from "../../abi.json"
-import { RefetchType } from '@/types/types'
+import { ReclaimDialogProps } from '@/types/types'
 import { toast } from 'sonner'
+import { useDispatch } from 'react-redux'
+import { setTokenRefetch } from '@/store/refetchSlice'
 
-interface ReclaimDialogProps extends RefetchType {
-  tokenId: number
-}
 
 const Reclaim = ({ tokenId, refetch }:ReclaimDialogProps) => {
     const [open, setOpen] = useState(false)
     const contractaddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+    const dispatch = useDispatch();
 
     const { 
       writeContract,
@@ -37,13 +37,34 @@ const Reclaim = ({ tokenId, refetch }:ReclaimDialogProps) => {
       hash
     })
 
-    React.useEffect(() => {
+    useEffect(() => {
       if (isConfirmed) {
-        toast.success("Shared successfully!")
-        refetch?.()
+        toast.success("Reclaimed successfully!")
+        setTimeout(() => {
+          refetch()
+        }, 3000)
+        dispatch(setTokenRefetch({ 
+          dashboard: true,
+          resourcesTab: true,
+          tokensTab: true,
+        }))
         setOpen(false)
       }
-    }, [isConfirmed, refetch])
+
+      if (error) {
+        toast.error(`Error: ${error.message}`)
+      }
+      if (isPending) {
+        toast.loading("Transaction is pending...")
+      }
+      if (isCreating) {
+        toast.loading("Waiting for confirmation...")
+      }
+
+      return () => {
+        toast.dismiss() 
+      }
+    }, [isConfirmed, refetch, dispatch, error, isPending, isCreating])
 
     const handleReclaim = () => {
         writeContract({

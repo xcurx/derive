@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as LitJsSdk from "@lit-protocol/lit-node-client-nodejs";
-import { LIT_ABILITY, LIT_NETWORK, LIT_RPC } from "@lit-protocol/constants";
+import { LIT_ABILITY, LIT_NETWORK } from "@lit-protocol/constants";
 import { decryptFromJson, encryptToJson } from '@lit-protocol/encryption';
 import { createSiweMessageWithRecaps, generateAuthSig, LitAccessControlConditionResource } from "@lit-protocol/auth-helpers";
-import { providers, Wallet } from 'ethers'
+import { providers } from 'ethers'
 
 const evmContractConditions = [
   {
@@ -49,18 +49,10 @@ export class Lit {
   }
 
   async #initContractClient() {
-    const walletWithCapacityCredit = new Wallet(
-      process.env.NEXT_PUBLIC_PRIVATE_KEY as `0x${string}`,
-      new providers.JsonRpcProvider(LIT_RPC.CHRONICLE_YELLOWSTONE)
-    );
-    
-    const { capacityDelegationAuthSig } =
-    await this.litNodeClient.createCapacityDelegationAuthSig({
-      uses: '100',
-      dAppOwnerWallet: walletWithCapacityCredit,
-      capacityTokenId: process.env.NEXT_PUBLIC_LIT_CAPACITY_TOKEN_ID,
-      expiration: new Date(Date.now() + 10 * 1000).toISOString() // 1 second
+    const res = await fetch(`/api/auth-sig`,{
+      method: "POST",
     });
+    const { capacityDelegationAuthSig } = await res.json();
 
     this.capacityDelegationAuthSig = capacityDelegationAuthSig;
   }
@@ -154,7 +146,6 @@ export class Lit {
       },
     );
     this.litNodeClient.disconnect();
-    
 
     return decryptedFile;
   }

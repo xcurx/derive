@@ -11,8 +11,6 @@ import { useAccount } from "wagmi"
 export default function Component() {
   const { isConnected, chain } = useAccount()
 
-  console.log("isConnected:", chain)
-
   if (!isConnected) {
     return (
       <div className="text-center py-20">

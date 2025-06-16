@@ -18,8 +18,6 @@ const Share = () => {
     }
   });
 
-  console.log("Resources data:", data);
-
   if(loading) {
     return <div>Loading</div>
   }

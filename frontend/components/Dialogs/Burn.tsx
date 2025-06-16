@@ -21,7 +21,6 @@ const Burn = ({ tokenId, refetch }: BurnDialogProps) => {
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
   
-  
   const { 
     writeContract,
     data: hash,
@@ -66,7 +65,7 @@ const Burn = ({ tokenId, refetch }: BurnDialogProps) => {
       toast.loading("Transaction is pending...");
     }
     if (error) {
-      toast.error("Error burning key: " + error.message);
+      toast.error("Error burning key: " + error.cause);
     }
 
     return () => {

@@ -24,9 +24,6 @@ const CreateNFT = ({ refetch, quickCreate }:CreateNFTKeyProps) => {
     const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
     const dispatch = useDispatch()
     
-
-    console.log("Contract Address:", contractAddress)
-
     const { 
       writeContract,
       data: hash,
@@ -72,12 +69,11 @@ const CreateNFT = ({ refetch, quickCreate }:CreateNFTKeyProps) => {
         toast.loading("Creating NFT Key...");
       }
       if (error) {
-        toast.error(`Error: ${error.message}`);
+        toast.error(`Error: ${error.cause}`);
       }
       if (isPending) {
         toast.loading("Transaction is pending...");
       }
-
       return () => {
         toast.dismiss();
       }

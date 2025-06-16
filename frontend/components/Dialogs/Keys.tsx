@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from '../ui/button'
 import { Key } from 'lucide-react'
-import { Token } from '@/types/types'
+import { KeysDialogProps, Token } from '@/types/types'
 import { Card } from '../ui/card'
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { useQuery } from '@apollo/client'
@@ -25,12 +25,19 @@ import { GET_OWNED_NFT_KEYS } from '@/graphql/queries'
 import { zeroAddress } from 'viem'
 import { toast } from 'sonner'
 import { abi } from '../../abi.json'    
+import { useDispatch } from 'react-redux'
+import { setResourceRefetch } from '@/store/refetchSlice'
+import { useAppSelector } from '@/store/store'
+import Reclaim from './Reclaim'
 
-const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
+const Keys = ({ tokens, resourceId, refetch:tokenRefetch }:KeysDialogProps) => {
     const [open, setOpen] = useState(false)
     const { address } = useAccount()
     const [tokenId, setTokenId] = useState<number | undefined>(undefined);
     const contractaddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
+    const [isRemoving, setIsRemoving] = useState(false);
+    const dispatch = useDispatch();
+    const shouldRefetch = useAppSelector((state) => state.refetch);
 
     const { loading, error:errorInquery, data, refetch } = useQuery(GET_OWNED_NFT_KEYS, {
       variables: {
@@ -73,6 +80,7 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
           toast.error("Please select a token ID");
           return;
         }
+        setIsRemoving(true);
 
         writeContract({
           address: contractaddress,
@@ -84,13 +92,26 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
 
     useEffect(() => {
       if (isConfirmed) {
-        toast.success("Key added successfully!");
+        if (isRemoving) {
+          setIsRemoving(false);
+          toast.success("Key removed successfully!");
+        } else {
+          toast.success("Key added successfully!");
+        }
         setTimeout(() => {
+          tokenRefetch();
           refetch();
-        }, 1000)
+        }, 3000)
+        dispatch(setResourceRefetch({
+          dashboard:true,
+          resourcesTab: shouldRefetch.resource.resourcesTab
+        }))
       }
       if (error) {
-        toast.error(`Error adding key: ${error.message}`);
+        toast.error(`Error adding key: ${error.cause}`);
+        if(isRemoving) {
+          setIsRemoving(false);
+        }
       }
       if (isPending && !isConfirmed && !error && !isCreating) {
         toast.loading("Transaction is pending...", {});
@@ -101,8 +122,9 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
 
       return () => {
         toast.dismiss();
+        setIsRemoving(false);
       }
-    }, [isConfirmed, error, isPending, isCreating, refetch]);
+    }, [isConfirmed, error, isPending, isCreating, refetch, isRemoving, dispatch, shouldRefetch, tokenRefetch]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -165,10 +187,8 @@ const Keys = ({ tokens, resourceId }:{ tokens:Token[], resourceId:string }) => {
                   </div>
                   <div className='flex my-2 space-x-4 justify-end'>
                     {
-                        token.currentOwner !== token.realOwner ?
-                        <Button size={"sm"}>
-                          Reclaim
-                        </Button> : null
+                        token.currentOwner !== token.realOwner &&
+                        <Reclaim tokenId={token.tokenId} refetch={refetch}/>
                     }
                     <Button size={"sm"} onClick={() => handleRemoveKey(token.tokenId)}>
                       Remove

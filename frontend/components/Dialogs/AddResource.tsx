@@ -75,8 +75,6 @@ export default function AddResource({ refetch, quickUpload }:AddResourceProps) {
     }
   }
 
-  console.log("name", name, tokenId)
-
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -160,7 +158,7 @@ export default function AddResource({ refetch, quickUpload }:AddResourceProps) {
       toast.loading("Uploading resource...");
     }
     if (error) {
-      toast.error(`Error: ${error.message}`);
+      toast.error(`Error: ${error.cause}`);
     }
     if (isPending) {
       toast.loading("Transaction is pending...");

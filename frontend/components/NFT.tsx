@@ -17,8 +17,6 @@ const NFT = () => {
       }
     });
 
-    console.log("NFT Address:", address, data);
-
   return (
     <>
         <div className="flex justify-between items-center">

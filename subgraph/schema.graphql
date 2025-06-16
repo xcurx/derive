@@ -87,3 +87,19 @@ type Resource @entity(immutable: false) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
 }
+
+type EventEntity @entity(immutable: true) {
+  id: Bytes!
+  eventType: String!
+  owner: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  transfer: Transfer
+  accessAdded: AccessAdded
+  creation: Creation
+  keyReclaimed: KeyReclaimed
+  removedFromList: RemovedFromList
+  resourceAdded: ResourceAdded
+  resourceRemoved: ResourceRemoved
+}
