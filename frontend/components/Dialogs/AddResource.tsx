@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label"
 import { Upload } from 'lucide-react'
 import { toast } from "sonner"
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi"
-import { abi } from "../../abi.json"
+import Abi from "../../abi.json"
 import { encodeAbiParameters, keccak256, parseAbiParameters, zeroAddress } from 'viem'
 import { GET_MY_NFT_KEYS } from "@/graphql/queries"
 import { useQuery } from "@apollo/client"
@@ -135,7 +135,7 @@ export default function AddResource({ refetch, quickUpload }:AddResourceProps) {
 
     writeContract({
       address: contractaddress,
-      abi,
+      abi: Abi.abi,
       functionName: "addResource",
       args: [name, cid, tokenId],
     })

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { DialogTrigger } from '@radix-ui/react-dialog'
-import { abi} from "../../abi.json";
+import Abi from "../../abi.json";
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { Plus } from 'lucide-react';
 import { Input } from '../ui/input';
@@ -46,7 +46,7 @@ const CreateNFT = ({ refetch, quickCreate }:CreateNFTKeyProps) => {
 
       writeContract({
         address: contractAddress,
-        abi,
+        abi: Abi.abi,
         functionName: "createNFT",
         args: [name],
       })

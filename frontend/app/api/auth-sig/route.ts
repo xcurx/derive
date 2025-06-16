@@ -1,9 +1,9 @@
 import { Wallet, providers } from 'ethers';
 import { LIT_NETWORK, LIT_RPC } from '@lit-protocol/constants';
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import * as LitJsSdk from "@lit-protocol/lit-node-client-nodejs";
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   const privateKey = process.env.LIT_PAYER_PRIVATE_KEY;
   const tokenId = process.env.LIT_CAPACITY_TOKEN_ID;
   const litNodeClient = new LitJsSdk.LitNodeClientNodeJs({

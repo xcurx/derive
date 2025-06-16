@@ -11,7 +11,7 @@ import {
 import { Button } from '../ui/button'
 import { Download } from 'lucide-react'
 import { useAccount, useReadContract } from 'wagmi'
-import { abi } from "../../abi.json"
+import Abi from "../../abi.json"
 import { Lit } from '@/lit'
 import { PinataReturnType, Resource } from '@/types/types'
 import { toast } from 'sonner'
@@ -29,7 +29,7 @@ const OpenResource = ({ resourceId }:{ resourceId:string }) => {
       error
     } = useReadContract({
       address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      abi,
+      abi: Abi.abi,
       functionName: "getResource",
       args: [address as `0x${string}`, resourceId as `0x${string}`],
     })

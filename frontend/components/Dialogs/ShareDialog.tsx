@@ -14,7 +14,7 @@ import { ShareDialogProps } from '@/types/types'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import { Input } from '../ui/input'
 import { toast } from 'sonner'
-import { abi } from "../../abi.json"
+import Abi from "../../abi.json"
 import { isAddress } from 'viem'
 import { useDispatch } from 'react-redux'
 import { setTokenRefetch } from '@/store/refetchSlice'
@@ -50,7 +50,7 @@ const ShareDialog = ({ token, refetch }:ShareDialogProps) => {
 
         writeContract({
           address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-          abi: abi,
+          abi: Abi.abi,
           functionName: "share",
           args: [value, token.tokenId],
         })

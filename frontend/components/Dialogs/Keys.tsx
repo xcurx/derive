@@ -24,7 +24,7 @@ import { useQuery } from '@apollo/client'
 import { GET_OWNED_NFT_KEYS } from '@/graphql/queries'
 import { zeroAddress } from 'viem'
 import { toast } from 'sonner'
-import { abi } from '../../abi.json'    
+import Abi from '../../abi.json'    
 import { useDispatch } from 'react-redux'
 import { setResourceRefetch } from '@/store/refetchSlice'
 import { useAppSelector } from '@/store/store'
@@ -69,7 +69,7 @@ const Keys = ({ tokens, resourceId, refetch:tokenRefetch }:KeysDialogProps) => {
 
         writeContract({
           address: contractaddress,
-          abi,
+          abi: Abi.abi,
           functionName: "addAccess",
           args: [resourceId, tokenId],
         })
@@ -84,7 +84,7 @@ const Keys = ({ tokens, resourceId, refetch:tokenRefetch }:KeysDialogProps) => {
 
         writeContract({
           address: contractaddress,
-          abi,
+          abi: Abi.abi,
           functionName: "removeNFTFromList",
           args: [resourceId, tokenId],
         })

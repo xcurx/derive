@@ -12,7 +12,7 @@ import { Button } from '../ui/button'
 import { Trash } from 'lucide-react'
 import { RemoveDialogProps } from '@/types/types'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
-import { abi } from "../../abi.json"
+import Abi from "../../abi.json"
 import { toast } from 'sonner'
 import { useDispatch } from 'react-redux'
 import { setResourceRefetch } from '@/store/refetchSlice'
@@ -80,7 +80,7 @@ const Remove = ({ resourceId, refetch }: RemoveDialogProps) => {
 
     writeContract({
       address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      abi: abi,
+      abi: Abi.abi,
       functionName: "removeResource",
       args: [resourceId as `0x${string}`],
     })

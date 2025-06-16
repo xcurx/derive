@@ -11,7 +11,7 @@ import {
 import { Button } from '../ui/button'
 import { Share2 } from 'lucide-react'
 import { useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
-import { abi } from "../../abi.json"
+import Abi from "../../abi.json"
 import { ReclaimDialogProps } from '@/types/types'
 import { toast } from 'sonner'
 import { useDispatch } from 'react-redux'
@@ -69,7 +69,7 @@ const Reclaim = ({ tokenId, refetch }:ReclaimDialogProps) => {
     const handleReclaim = () => {
         writeContract({
             address: contractaddress,
-            abi,
+            abi: Abi.abi,
             functionName: 'reclaimKey',
             args: [tokenId]
         })
